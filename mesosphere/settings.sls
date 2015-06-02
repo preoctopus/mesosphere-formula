@@ -30,8 +30,8 @@
 {%- endif %}
 
 {%- set mmquorum = 1 %}
-{%- if mm|length < 1 %}
-{%-   set mmquorum = mm|length // 2 %}
+{%- if mm|length > 2 %}
+{%-   set mmquorum = (mm|length // 2) + 1 %}
 {%- endif %}
 
 {%- set mesos = {} %}
@@ -69,7 +69,7 @@
 {%-   do mesos_conf_master.update({ config_item : gcm.get(config_item, gc.get( config_item, pcm.get(config_item, pc.get( config_item, None)))) }) %}
 {%- endfor %}
 {%- do mesos_conf_master.update({ 
-    'quorum'   : mmquorum,
+    'quorum'   : pcm.get('quorum', pc.get('quorum', mmquorum)),
     'work_dir' : pcm.get('work_dir', pc.get('work_dir', '/var/lib/mesos')),
     'cluster'  : pcm.get('cluster', pc.get('cluster', 'mycluster'))
 }) %}
