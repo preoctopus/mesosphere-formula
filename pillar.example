@@ -1,0 +1,23 @@
+# these are the supported pillars with some example settings
+
+mesosphere:
+  mesos:
+    version: 0.20.0
+    config:
+      interface: eth1
+      cluster: mesos
+      containerizers: mesos,docker
+      executor_registration_timeout: 5mins
+      docker_remove_delay: 1hrs
+      resources: 'ports(*):[31000-32000, 8000-9000]'
+  marathon:
+    version: 0.8.0
+    config:
+      event_subscriber: http_callback
+
+
+mine_functions:
+  network.interfaces: []
+  test.ping: []
+
+# you can override everything in config: locally with grains.
