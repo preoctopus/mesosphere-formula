@@ -4,8 +4,9 @@ mesos:
   pkg.installed:
     - version: {{ mesos.version }}
 
-zookeeper:
+zookeeper-mesos:
   service:
+    - name: zookeeper
     - require:
       - pkg: mesos
 {%- if mesos.zk_role in grains['roles'] %}

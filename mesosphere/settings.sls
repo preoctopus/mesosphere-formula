@@ -34,6 +34,12 @@
 {%-   set mmquorum = (mm|length // 2) + 1 %}
 {%- endif %}
 
+{%- set ip = grains['ip_interfaces'][gc.get('interface', pc.get('interface', 'eth0'))][0] %}
+{%- set hostname = grains['fqdn'] %}
+{%- if gc.get('host_is_ip', pc.get('host_is_ip', False)) == True %}
+{%-   set hostname = ip %}
+{%- endif %}
+
 {%- set mesos = {} %}
 {%- do mesos.update( {
   'version'      : pm.get('version', '0.20.0'),
@@ -55,8 +61,8 @@
 {# master/slave config item, merged in later #}
 {%- set mesos_conf = {} %}
 {%- do mesos_conf.update({
-    'ip'  : grains['ip_interfaces'][gc.get('interface', pc.get('interface', 'eth0'))][0],
-    'hostname' : grains['fqdn']
+    'ip'  : ip,
+    'hostname' : hostname
 }) %}
 {%- for config_item in ['logging_level', 'port'] %}
 {%-   do mesos_conf.update({ config_item : gc.get(config_item, pc.get(config_item, None)) }) %}
@@ -65,7 +71,7 @@
 {# master config items #}
 {%- set mesos_conf_master = {} %}
 {%- do mesos_conf_master.update(mesos_conf) %}
-{%- for config_item in ['acls', 'allocation_interval', 'allocator', 'authenticate', 'authenticate_slaves', 'authenticators', 'credentials', 'external_log_file', 'framework_sorter', 'hostname', 'offer_timeout', 'rate_limits', 'roles', 'weights'] %}
+{%- for config_item in ['acls', 'allocation_interval', 'allocator', 'authenticate', 'authenticate_slaves', 'authenticators', 'credentials', 'external_log_file', 'framework_sorter', 'offer_timeout', 'rate_limits', 'roles', 'weights'] %}
 {%-   do mesos_conf_master.update({ config_item : gcm.get(config_item, gc.get( config_item, pcm.get(config_item, pc.get( config_item, None)))) }) %}
 {%- endfor %}
 {%- do mesos_conf_master.update({ 
@@ -77,12 +83,15 @@
 {# slave config items #}
 {%- set mesos_conf_slave = {} %}
 {%- do mesos_conf_slave.update(mesos_conf) %}
-{%- for config_item in ['attributes', 'containerizers', 'credential', 'docker', 'docker_remove_delay', 'docker_sock', 'docker_sandbox_directory', 'docker_stop_timeout', 'executor_registration_timeout', 'hostname', 'resources'] %}
+{%- for config_item in ['attributes', 'containerizers', 'credential', 'docker', 'docker_remove_delay', 'docker_sock', 'docker_sandbox_directory', 'docker_stop_timeout', 'executor_registration_timeout', 'resources'] %}
 {%-   do mesos_conf_slave.update({ config_item : gcs.get(config_item, gc.get(config_item, pcs.get( config_item, pc.get( config_item, None)))) }) %}
 {%- endfor %}
 
 {# marathon config items #}
 {%- set mesos_conf_marathon = {} %}
-{%- for config_item in ['event_subscriber', 'access_control_allow_origin', 'framework_name', 'ha', 'webui_url', 'mesos_role', ] %}
+{%- do mesos_conf_marathon.update({
+    'hostname' : hostname
+}) %}
+{%- for config_item in ['event_subscriber', 'access_control_allow_origin', 'framework_name', 'ha', 'webui_url', 'mesos_role' ] %}
 {%-   do mesos_conf_marathon.update({ config_item : gcma.get(config_item, pcma.get(config_item, None))}) %}
 {%- endfor %}
