@@ -1,3 +1,6 @@
+apt-transport-https:
+  pkg.installed
+
 base:
   pkgrepo.managed:
     - humanname: Mesosphere Repo
